@@ -1,0 +1,42 @@
+<html>
+
+<head>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.9/angular.min.js"></script>
+</head>
+
+<body ng-app="myapp" ng-controller="login_con">
+    <form ng-submit="submit()">
+        <label>Username</label>
+        <input type="email" ng-model="mail"><br>
+        <label>Password</label>
+        <input type="password" ng-model="pass"><br>
+        <input type="submit" value="Submit">
+    </form>
+    <p>{{msg}}</p>
+</body>
+<script>
+    var app = angular.module("myapp", []);
+    app.controller("login_con", function ($scope, $http) {
+        $scope.submit = function () {
+            const loginData = {
+                email: $scope.mail,
+                password: $scope.pass
+            };
+
+            $http.post('http://localhost:3000/api/login', loginData)
+                .then(function (res) {
+                    if (res.data.success) {
+                        $scope.msg = res.data.success;
+                    } else {
+                        $scope.msg = res.data.error || "Login failed";
+                    }
+                })
+                .catch(function (err) {
+                    console.log(err);
+                    $scope.msg = "Server error";
+                });
+        };
+    });
+</script>
+
+</html>

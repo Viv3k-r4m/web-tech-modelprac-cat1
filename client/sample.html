@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="myapp">
+
+<head>
+    <meta charset="UTF-8">
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.9/angular.min.js"></script>
+
+    <style>
+        input,
+        label,
+        button {
+            display: block;
+            margin: 5px 0;
+        }
+
+        .container {
+            width: 400px;
+            margin: auto;
+        }
+
+        h5 {
+            margin: 5px 0;
+        }
+
+        .item {
+            border: 1px solid #ccc;
+            padding: 10px;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+
+<body ng-controller="form_validate">
+
+    <div class="container">
+
+        <h2>User Registration / Update Form</h2>
+
+        <!-- FORM -->
+        <form ng-submit="submit()">
+            <label>Name</label>
+            <input type="text" ng-model="name" required>
+
+            <label>Password</label>
+            <input type="password" ng-model="pass" ng-change="passw()" required>
+            <h5 ng-style="textstyle">{{ text }}</h5>
+
+            <label>Email</label>
+            <input type="email" ng-model="mail" required>
+
+            <label>Date of Birth</label>
+            <input type="date" ng-model="dob" required>
+
+            <input type="submit" value="{{ editId ? 'Update' : 'Submit' }}">
+            <button type="button" ng-click="resetForm()" ng-show="editId">Cancel Edit</button>
+        </form>
+
+        <hr>
+
+        <!-- LIST OF USERS -->
+        <h3>Registered Users</h3>
+        <div class="item" ng-repeat="x in items track by x._id">
+            <p><strong>ID:</strong> {{ x._id }}</p>
+            <p><strong>Name:</strong> {{ x.name }}</p>
+            <p><strong>Email:</strong> {{ x.email }}</p>
+            <p><strong>DOB:</strong> {{ x.dob }}</p>
+
+            <button ng-click="edit(x._id)">Edit</button>
+            <button ng-click="delete(x._id)">Delete</button>
+        </div>
+
+    </div>
+
+    <!-- ANGULARJS SCRIPT -->
+    <script>
+        var app = angular.module("myapp", []);
+        app.controller('form_validate', function ($scope, $http) {
+            $scope.text = "";
+            $scope.items = [];
+            $scope.editId = null;
+
+            $scope.getItems = function () {
+                $http.get('http://localhost:3000/api/sub')
+                    .then(function (res) {
+                        $scope.items = res.data;
+                    })
+                    .catch(function (err) {
+                        console.log(err);
+                    });
+            };
+            $scope.getItems();
+
+            $scope.passw = function () {
+                var pass = ($scope.pass || "").trim();
+                var len = pass.length;
+                var u = 0, l = 0, s = 0, n = 0;
+
+                for (var i = 0; i < len; i++) {
+                    var ch = pass.charAt(i);
+                    if (/[A-Z]/.test(ch)) u++;
+                    else if (/[a-z]/.test(ch)) l++;
+                    else if (/[0-9]/.test(ch)) n++;
+                    else s++;
+                }
+
+                if (len >= 6 && u >= 1 && l >= 3 && s >= 1 && n >= 1) {
+                    $scope.text = `Password strength: strong`;
+                    $scope.textstyle = { color: 'green' };
+                } else {
+                    $scope.text = "Password strength: weak";
+                    $scope.textstyle = { color: 'red' };
+                }
+            };
+
+            $scope.submit = function () {
+                const obj = {
+                    name: $scope.name,
+                    password: $scope.pass,
+                    email: $scope.mail,
+                    dob: $scope.dob ? $scope.dob.toISOString().split('T')[0] : null
+                };
+
+                if ($scope.editId) {
+                    // Update user
+                    $http.put(`http://localhost:3000/api/sub/${$scope.editId}`, obj)
+                        .then(function (res) {
+                            console.log("Updated:", res.data);
+                            $scope.resetForm();
+                            $scope.getItems();
+                        })
+                        .catch(function (err) {
+                            console.log("Update error:", err);
+                        });
+                } else {
+                    // Add new user
+                    $http.post('http://localhost:3000/api/sub', obj)
+                        .then(function (res) {
+                            console.log("Added:", res.data);
+                            $scope.resetForm();
+                            $scope.getItems();
+                        })
+                        .catch(function (err) {
+                            console.log("Add error:", err);
+                        });
+                }
+            };
+
+            $scope.edit = function (id) {
+                const record = $scope.items.find(item => item._id === id);
+                if (record) {
+                    $scope.name = record.name;
+                    $scope.mail = record.email;
+                    $scope.dob = new Date(record.dob);
+                    $scope.pass = "";
+                    $scope.editId = id;
+                    $scope.text = "Editing user: " + record.name;
+                    $scope.textstyle = { color: "blue" };
+                }
+            };
+
+            $scope.delete = function (id) {
+                $http.delete(`http://localhost:3000/api/sub/${id}`)
+                    .then(function (res) {
+                        console.log("Deleted:", res.data);
+                        $scope.getItems();
+                    })
+                    .catch(function (err) {
+                        console.log("Delete error:", err);
+                    });
+            };
+
+            $scope.resetForm = function () {
+                $scope.name = "";
+                $scope.mail = "";
+                $scope.dob = null;
+                $scope.pass = "";
+                $scope.editId = null;
+                $scope.text = "";
+                $scope.textstyle = {};
+            };
+        });
+    </script>
+
+</body>
+
+</html>
