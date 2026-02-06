@@ -4,183 +4,124 @@
 <head>
     <meta charset="UTF-8">
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.9/angular.min.js"></script>
-
     <style>
-        input,
-        label,
-        button {
-            display: block;
-            margin: 5px 0;
-        }
-
-        .container {
-            width: 400px;
-            margin: auto;
-        }
-
-        h5 {
-            margin: 5px 0;
-        }
-
-        .item {
-            border: 1px solid #ccc;
-            padding: 10px;
-            margin-top: 10px;
-        }
+        .container { width: 400px; margin: auto; }
+        input, label, button { display: block; margin: 5px 0; }
+        .item { border: 1px solid #ccc; padding: 10px; margin-top: 10px; }
     </style>
 </head>
 
-<body ng-controller="form_validate">
-
+<body ng-controller="formCtrl">
     <div class="container">
+        <h2>User {{ user._id ? 'Update' : 'Registration' }} Form</h2>
 
-        <h2>User Registration / Update Form</h2>
-
-        <!-- FORM -->
         <form ng-submit="submit()">
             <label>Name</label>
-            <input type="text" ng-model="name" required>
+            <input type="text" ng-model="user.name" required>
 
             <label>Password</label>
-            <input type="password" ng-model="pass" ng-change="passw()" required>
-            <h5 ng-style="textstyle">{{ text }}</h5>
+            <input type="password" ng-model="user.password" ng-change="checkPassword()" required>
+            <h5 ng-style="textStyle">{{ passwordText }}</h5>
 
             <label>Email</label>
-            <input type="email" ng-model="mail" required>
+            <input type="email" ng-model="user.email" required>
 
-            <label>Date of Birth</label>
-            <input type="date" ng-model="dob" required>
+            <label>DOB</label>
+            <input type="date" ng-model="user.dob" required>
 
-            <input type="submit" value="{{ editId ? 'Update' : 'Submit' }}">
-            <button type="button" ng-click="resetForm()" ng-show="editId">Cancel Edit</button>
+            <input type="submit" value="{{ user._id ? 'Update' : 'Submit' }}">
+            <button type="button" ng-click="reset()" ng-show="user._id">Cancel Edit</button>
         </form>
 
         <hr>
 
-        <!-- LIST OF USERS -->
         <h3>Registered Users</h3>
-        <div class="item" ng-repeat="x in items track by x._id">
-            <p><strong>ID:</strong> {{ x._id }}</p>
-            <p><strong>Name:</strong> {{ x.name }}</p>
-            <p><strong>Email:</strong> {{ x.email }}</p>
-            <p><strong>DOB:</strong> {{ x.dob }}</p>
+        <div class="item" ng-repeat="u in users track by u._id">
+            <p><strong>ID:</strong> {{ u._id }}</p>
+            <p><strong>Name:</strong> {{ u.name }}</p>
+            <p><strong>Email:</strong> {{ u.email }}</p>
+            <p><strong>DOB:</strong> {{ u.dob }}</p>
 
-            <button ng-click="edit(x._id)">Edit</button>
-            <button ng-click="delete(x._id)">Delete</button>
+            <button ng-click="edit(u)">Edit</button>
+            <button ng-click="remove(u._id)">Delete</button>
         </div>
-
     </div>
 
-    <!-- ANGULARJS SCRIPT -->
     <script>
-        var app = angular.module("myapp", []);
-        app.controller('form_validate', function ($scope, $http) {
-            $scope.text = "";
-            $scope.items = [];
-            $scope.editId = null;
+        angular.module("myapp", []).controller("formCtrl", function ($scope, $http) {
+            const API = 'http://localhost:3000/api/sub';
+            $scope.users = [];
+            $scope.user = {};
+            $scope.passwordText = '';
+            $scope.textStyle = {};
 
-            $scope.getItems = function () {
-                $http.get('http://localhost:3000/api/sub')
-                    .then(function (res) {
-                        $scope.items = res.data;
-                    })
-                    .catch(function (err) {
-                        console.log(err);
-                    });
-            };
-            $scope.getItems();
+            function fetchUsers() {
+                $http.get(API)
+                    .then(res => $scope.users = res.data)
+                    .catch(err => console.error("Fetch error:", err));
+            }
 
-            $scope.passw = function () {
-                var pass = ($scope.pass || "").trim();
-                var len = pass.length;
-                var u = 0, l = 0, s = 0, n = 0;
+            $scope.checkPassword = function () {
+                const p = $scope.user.password || '';
+                const hasUpper = /[A-Z]/.test(p);
+                const hasLower = (p.match(/[a-z]/g) || []).length >= 3;
+                const hasDigit = /[0-9]/.test(p);
+                const hasSpecial = /[^a-zA-Z0-9]/.test(p);
+                const strong = p.length >= 6 && hasUpper && hasLower && hasDigit && hasSpecial;
 
-                for (var i = 0; i < len; i++) {
-                    var ch = pass.charAt(i);
-                    if (/[A-Z]/.test(ch)) u++;
-                    else if (/[a-z]/.test(ch)) l++;
-                    else if (/[0-9]/.test(ch)) n++;
-                    else s++;
-                }
-
-                if (len >= 6 && u >= 1 && l >= 3 && s >= 1 && n >= 1) {
-                    $scope.text = `Password strength: strong`;
-                    $scope.textstyle = { color: 'green' };
-                } else {
-                    $scope.text = "Password strength: weak";
-                    $scope.textstyle = { color: 'red' };
-                }
+                $scope.passwordText = "Password strength: " + (strong ? "strong" : "weak");
+                $scope.textStyle = { color: strong ? "green" : "red" };
             };
 
             $scope.submit = function () {
-                const obj = {
-                    name: $scope.name,
-                    password: $scope.pass,
-                    email: $scope.mail,
-                    dob: $scope.dob ? $scope.dob.toISOString().split('T')[0] : null
+                const data = {
+                    name: $scope.user.name,
+                    password: $scope.user.password,
+                    email: $scope.user.email,
+                    dob: $scope.user.dob ? $scope.user.dob.toISOString().split('T')[0] : null
                 };
 
-                if ($scope.editId) {
-                    // Update user
-                    $http.put(`http://localhost:3000/api/sub/${$scope.editId}`, obj)
-                        .then(function (res) {
-                            console.log("Updated:", res.data);
-                            $scope.resetForm();
-                            $scope.getItems();
-                        })
-                        .catch(function (err) {
-                            console.log("Update error:", err);
-                        });
-                } else {
-                    // Add new user
-                    $http.post('http://localhost:3000/api/sub', obj)
-                        .then(function (res) {
-                            console.log("Added:", res.data);
-                            $scope.resetForm();
-                            $scope.getItems();
-                        })
-                        .catch(function (err) {
-                            console.log("Add error:", err);
-                        });
-                }
+                const req = $scope.user._id
+                    ? $http.put(`${API}/${$scope.user._id}`, data)
+                    : $http.post(API, data);
+
+                req.then(function () {
+                    $scope.reset();
+                    fetchUsers();
+                }).catch(function (err) {
+                    console.error("Submit error:", err);
+                });
             };
 
-            $scope.edit = function (id) {
-                const record = $scope.items.find(item => item._id === id);
-                if (record) {
-                    $scope.name = record.name;
-                    $scope.mail = record.email;
-                    $scope.dob = new Date(record.dob);
-                    $scope.pass = "";
-                    $scope.editId = id;
-                    $scope.text = "Editing user: " + record.name;
-                    $scope.textstyle = { color: "blue" };
-                }
+            $scope.edit = function (u) {
+                $scope.user = {
+                    _id: u._id,
+                    name: u.name,
+                    email: u.email,
+                    dob: new Date(u.dob),
+                    password: ""
+                };
+                $scope.passwordText = `Editing user: ${u.name}`;
+                $scope.textStyle = { color: "blue" };
             };
 
-            $scope.delete = function (id) {
-                $http.delete(`http://localhost:3000/api/sub/${id}`)
-                    .then(function (res) {
-                        console.log("Deleted:", res.data);
-                        $scope.getItems();
-                    })
+            $scope.remove = function (id) {
+                $http.delete(`${API}/${id}`)
+                    .then(fetchUsers)
                     .catch(function (err) {
-                        console.log("Delete error:", err);
+                        console.error("Delete error:", err);
                     });
             };
 
-            $scope.resetForm = function () {
-                $scope.name = "";
-                $scope.mail = "";
-                $scope.dob = null;
-                $scope.pass = "";
-                $scope.editId = null;
-                $scope.text = "";
-                $scope.textstyle = {};
+            $scope.reset = function () {
+                $scope.user = {};
+                $scope.passwordText = "";
+                $scope.textStyle = {};
             };
+
+            // Initial load
+            fetchUsers();
         });
     </script>
-
 </body>
-
 </html>
