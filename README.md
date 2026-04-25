@@ -15,8 +15,7 @@ A full-stack User Management System demonstrating REST API operations (**GET, PO
 
 This project simulates a complete user workflow system:
 
-- User Registration  
-- User Login  
+- User Registration   
 - Update Profile  
 - Delete User  
 - View User Data  
@@ -28,7 +27,6 @@ This project simulates a complete user workflow system:
 | Feature      | Method | Description              |
 |--------------|--------|--------------------------|
 | Add User     | POST   | Register new user        |
-| Login        | POST   | Validate credentials     |
 | Update User  | PUT    | Modify details           |
 | Delete User  | DELETE | Remove user              |
 | Get Users    | GET    | Fetch user data          |
@@ -47,16 +45,8 @@ This project simulates a complete user workflow system:
 
 ## 📸 Screenshots
 
-> Add screenshots inside a `/screenshots` folder
-
-### Registration Page
+### Registration Page with Dashboard
 ![Registration](screenshots/register.png)
-
-### Login Page
-![Login](screenshots/login.png)
-
-### Dashboard
-![Dashboard](screenshots/dashboard.png)
 
 ---
 
@@ -122,17 +112,7 @@ docker build -t myapp/frontend:latest ./client
 ### Step 2: Deploy
 
 ```bash
-kubectl apply -f namespace.yaml
-
-kubectl apply -f mongo-pvc.yaml
-kubectl apply -f mongo-deployment.yaml
-kubectl apply -f mongo-service.yaml
-
-kubectl apply -f backend-deployment.yaml
-kubectl apply -f backend-service.yaml
-
-kubectl apply -f frontend-deployment.yaml
-kubectl apply -f frontend-service.yaml
+kubectl apply -f k8s/
 ```
 
 ---
