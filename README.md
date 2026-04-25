@@ -1,69 +1,211 @@
-# Web Tech ModelPrac CAT1
+# 🚀 Web Tech ModelPrac CAT1
 
-This is a revision project demonstrating the use of various API methods (**PUT**, **POST**, **DELETE**, **GET**) integrated with **Node.js**, **MongoDB**, and **AngularJS**.
+![Node.js](https://img.shields.io/badge/Node.js-18-green)
+![AngularJS](https://img.shields.io/badge/AngularJS-1.x-red)
+![MongoDB](https://img.shields.io/badge/MongoDB-6-green)
+![Docker](https://img.shields.io/badge/Docker-Container-blue)
+![Kubernetes](https://img.shields.io/badge/Kubernetes-Orchestration-blue)
+![License](https://img.shields.io/badge/License-MIT-yellow)
 
----
-
-## Project Overview
-
-The project simulates basic user management functionalities such as registration, login, update, delete, and fetch operations using RESTful APIs.
-
----
-
-## Features
-
-### User Management with API Methods
-
-1. **Add User Details** - `POST`  
-   Adds new user details to the database during registration.
-
-2. **User Login Check** - `POST`  
-   Validates user credentials during login.
-
-3. **Update User Details** - `PUT`  
-   Allows updating of user information such as name, email, or password.
-
-4. **Delete User** - `DELETE`  
-   Removes a user’s record from the database.
-
-5. **Display User Details** - `GET`  
-   Retrieves and displays all or specific user details from the database.
+A full-stack User Management System demonstrating REST API operations (**GET, POST, PUT, DELETE**) using AngularJS, Node.js, Express, MongoDB, with Docker and Kubernetes deployment.
 
 ---
 
-## Frontend: AngularJS
+## 📌 Project Overview
 
-- **Form Validation:**  
-  AngularJS is used for validating the registration form, especially for real-time password strength and matching validations using the `ng-change` directive.
+This project simulates a complete user workflow system:
 
-- **HTTP Requests:**  
-  AngularJS `$http` service is used to interact with the backend API.
-
----
-
-## Backend: Node.js + Express
-
-- RESTful API endpoints are built using Node.js and Express.
-- Handles all HTTP methods (GET, POST, PUT, DELETE).
-- Connects with MongoDB to perform CRUD operations.
+- User Registration  
+- User Login  
+- Update Profile  
+- Delete User  
+- View User Data  
 
 ---
 
-## Database: MongoDB
+## 🌟 Features
 
-- Stores user details such as name, email, and password.
-- Mongoose is used as the ODM (Object Data Modeling) library.
+| Feature      | Method | Description              |
+|--------------|--------|--------------------------|
+| Add User     | POST   | Register new user        |
+| Login        | POST   | Validate credentials     |
+| Update User  | PUT    | Modify details           |
+| Delete User  | DELETE | Remove user              |
+| Get Users    | GET    | Fetch user data          |
+
+---
+
+## 🧰 Tech Stack
+
+- Frontend: AngularJS  
+- Backend: Node.js + Express  
+- Database: MongoDB + Mongoose  
+- DevOps: Docker, Kubernetes  
+- UI: HTML, CSS  
 
 ---
 
-## Technologies Used
+## 📸 Screenshots
 
-| Technology  | Purpose                          |
-|-------------|----------------------------------|
-| AngularJS   | Frontend + Form Validation       |
-| Node.js     | Backend Server                   |
-| Express.js  | Web Framework for Node.js        |
-| MongoDB     | NoSQL Database                   |
-| HTML/CSS    | Frontend UI                      |
+> Add screenshots inside a `/screenshots` folder
+
+### Registration Page
+![Registration](screenshots/register.png)
+
+### Login Page
+![Login](screenshots/login.png)
+
+### Dashboard
+![Dashboard](screenshots/dashboard.png)
 
 ---
+
+## 🐳 Docker Setup
+
+### Build and Run
+
+```bash
+docker-compose up --build
+```
+
+After first build:
+
+```bash
+docker-compose up
+```
+
+### Stop Containers
+
+```bash
+CTRL + C
+```
+
+### Remove Containers
+
+```bash
+docker-compose down
+```
+
+### Access App
+
+```
+http://localhost:8080
+```
+
+---
+
+## 🗄️ MongoDB Access (Docker)
+
+```bash
+docker ps
+docker exec -it <container-name> mongosh
+```
+
+```js
+use users
+db.register.find().pretty()
+```
+
+---
+
+## ☸️ Kubernetes Setup
+
+### Step 1: Build Images
+
+```bash
+docker build -t myapp/backend:latest ./server
+docker build -t myapp/frontend:latest ./client
+```
+
+---
+
+### Step 2: Deploy
+
+```bash
+kubectl apply -f namespace.yaml
+
+kubectl apply -f mongo-pvc.yaml
+kubectl apply -f mongo-deployment.yaml
+kubectl apply -f mongo-service.yaml
+
+kubectl apply -f backend-deployment.yaml
+kubectl apply -f backend-service.yaml
+
+kubectl apply -f frontend-deployment.yaml
+kubectl apply -f frontend-service.yaml
+```
+
+---
+
+### Step 3: Verify
+
+```bash
+kubectl get all -n myapp
+```
+
+---
+
+### Step 4: Access Frontend
+
+```bash
+kubectl port-forward svc/frontend 8081:80 -n myapp
+```
+
+Open:
+```
+http://localhost:8081
+```
+
+---
+
+### Step 5: Access Backend
+
+```bash
+kubectl port-forward svc/backend 3001:3000 -n myapp
+```
+
+---
+
+### Step 6: Check Logs
+
+```bash
+kubectl logs -n myapp deployment/backend
+```
+
+---
+
+### Step 7: MongoDB (Kubernetes)
+
+```bash
+kubectl get pods -n myapp
+kubectl exec -n myapp -it <mongo-pod-name> -- mongosh
+```
+
+---
+
+## 🎯 Learning Outcomes
+
+- REST API development using Express  
+- AngularJS frontend integration  
+- MongoDB CRUD operations  
+- Docker containerization  
+- Kubernetes deployment  
+
+---
+
+## 📁 Project Structure
+
+```
+.
+├── client/        # AngularJS frontend
+├── server/        # Node.js backend
+├── docker-compose.yml
+├── k8s/           # Kubernetes YAML files
+└── screenshots/   # Images for README
+```
+
+---
+
+## 📄 License
+
+This project is licensed under the MIT License.

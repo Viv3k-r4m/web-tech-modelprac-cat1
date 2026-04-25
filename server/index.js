@@ -7,7 +7,7 @@ const app=express();
 app.use(cors());
 app.use(express.json());
 
-const uri="mongodb://mongo:27017";
+const uri="mongodb://10.96.237.91:27017";
 const client=new MongoClient(uri);
 let db;
 
